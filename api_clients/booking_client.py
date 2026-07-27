@@ -27,6 +27,18 @@ class BookingApiClient:
             )
         return response.json()
 
+    def update_booking(self, booking_id: int, booking_payload: dict, token: str) -> dict:
+        response = requests.put(
+            f"{self.base_url}/{booking_id}",
+            cookies={"token": token},
+            json=booking_payload,
+        )
+        if response.status_code != 200:
+            raise ValueError(
+                f"Update booking failed with status {response.status_code}: {response.text}"
+            )
+        return response.json()
+
     def delete_booking(self, booking_id: int, token: str) -> None:
         response = requests.delete(
             f"{self.base_url}/{booking_id}",
