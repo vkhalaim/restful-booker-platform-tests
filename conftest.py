@@ -7,6 +7,7 @@ from api_clients.booking_client import BookingApiClient
 
 AUTH_BASE_URL = "http://localhost:3004/auth"
 BOOKING_BASE_URL = "http://localhost:3000/booking"
+LOGIN_BASE_URL = "http://localhost:3003/admin"
 
 
 def make_booking_payload(**kwargs):
