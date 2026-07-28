@@ -22,7 +22,7 @@ def make_booking_payload(**kwargs):
         "phone": "12345678901",
         "bookingdates": {
             "checkin": str(date.today() + timedelta(days=start_day)),
-            "checkout": str(date.today() + timedelta(days=start_day+duration)),
+            "checkout": str(date.today() + timedelta(days=start_day + duration)),
         },
     }
 

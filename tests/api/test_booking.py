@@ -1,6 +1,6 @@
 import pytest
 from api_clients.booking_client import BookingApiClient
-from conftest import BOOKING_BASE_URL, make_booking_payload
+from conftest import BOOKING_BASE_URL
 from datetime import date, timedelta
 
 
@@ -67,9 +67,7 @@ def test_update_booking_changes_data(created_booking, auth_token):
         "lastname": "Doe",
         "bookingdates": {"checkin": str(new_checkin), "checkout": str(new_checkout)},
     }
-    updated_response = booking.update_booking(
-        response["bookingid"], updated_payload, auth_token
-    )
+    updated_response = booking.update_booking(response["bookingid"], updated_payload, auth_token)
 
     updated_booking = updated_response["booking"]
     assert updated_booking["firstname"] == updated_payload["firstname"]
@@ -101,6 +99,4 @@ def test_update_booking_conflicts_with_own_partial_date_overlap(created_booking,
     }
 
     with pytest.raises(ValueError):
-        booking.update_booking(
-            response["bookingid"], partially_overlapping_payload, auth_token
-        )
+        booking.update_booking(response["bookingid"], partially_overlapping_payload, auth_token)

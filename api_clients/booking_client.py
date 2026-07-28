@@ -17,10 +17,7 @@ class BookingApiClient:
         return response.json()
 
     def get_booking(self, booking_id: int, token: str) -> dict:
-        response = requests.get(
-            f"{self.base_url}/{booking_id}",
-            cookies={"token": token}
-            )
+        response = requests.get(f"{self.base_url}/{booking_id}", cookies={"token": token})
         if response.status_code != 200:
             raise ValueError(
                 f"Get booking failed with status {response.status_code}: {response.text}"

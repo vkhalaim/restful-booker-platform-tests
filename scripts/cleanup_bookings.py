@@ -27,7 +27,11 @@ def cleanup_all_bookings():
             f"{BOOKING_BASE_URL}/{booking_id}",
             cookies={"token": token},
         )
-        status = "OK" if delete_response.status_code == 202 else f"FAILED ({delete_response.status_code})"
+        status = (
+            "OK"
+            if delete_response.status_code == 202
+            else f"FAILED ({delete_response.status_code})"
+        )
         print(f"  {booking_id}: {status}")
 
     print("Done.")
