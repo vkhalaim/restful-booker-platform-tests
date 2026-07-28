@@ -1,0 +1,83 @@
+name: Full E2E Suite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout test repo
+        uses: actions/checkout@v4
+
+      - name: Clone restful-booker-platform
+        run: git clone https://github.com/mwinteringham/restful-booker-platform.git
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '26'
+
+      - name: Set up Maven 3.9.14
+        run: |
+          wget https://archive.apache.org/dist/maven/maven-3/3.9.14/binaries/apache-maven-3.9.14-bin.tar.gz
+          tar xzf apache-maven-3.9.14-bin.tar.gz
+          echo "$PWD/apache-maven-3.9.14/bin" >> $GITHUB_PATH
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.1'
+
+      - name: Build and run restful-booker-platform
+        working-directory: restful-booker-platform
+        run: |
+          bash build_locally.sh > ../rbp.log 2>&1 &
+          echo "Started platform in background"
+
+      - name: Wait for services to be healthy
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3004/auth/actuator/health && \
+               curl -sf http://localhost:3000/booking/actuator/health && \
+               curl -sf http://localhost:3003; then
+              echo "All services up"
+              exit 0
+            fi
+            echo "Waiting for services... ($i)"
+            sleep 5
+          done
+          echo "Services did not become healthy in time"
+          cat rbp.log
+          exit 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: playwright install --with-deps
+
+      - name: Run API tests
+        run: pytest tests/api -v
+
+      - name: Run UI tests
+        run: pytest tests/ui -v
+
+      - name: Run hybrid tests
+        run: pytest tests/hybrid -v
+
+      - name: Run perf tests (Locust, headless)
+        run: |
+          locust -f tests/perf/locustfile.py --host http://localhost:3000/booking \
+            --headless -u 5 -r 1 -t 30s
